@@ -1,0 +1,1 @@
+# Multi-Purpose-Laravel-Vue-Application
