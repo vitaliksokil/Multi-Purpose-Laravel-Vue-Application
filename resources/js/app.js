@@ -7,23 +7,39 @@
 require('./bootstrap');
 
 window.Vue = require('vue');
+import moment from 'moment';
+import {Form, HasError, AlertError} from 'vform';
 
+window.Form = Form;
+Vue.component(HasError.name, HasError);
+Vue.component(AlertError.name, AlertError);
 
 // router
 import VueRouter from 'vue-router'
+
 Vue.use(VueRouter);
 
 
 const routes = [
-    { path: '/dashboard', component: require('./components/Dashboard').default },
-    { path: '/profile', component: require('./components/Profile').default }
+    {path: '/dashboard', component: require('./components/Dashboard').default},
+    {path: '/profile', component: require('./components/Profile').default},
+    {path: '/users', component: require('./components/Users').default}
 ];
 
 const router = new VueRouter({
-    mode:'history',
+    mode: 'history',
     routes // short for `routes: routes`
 });
 ////
+
+//filter
+Vue.filter('upText', function (text) {
+    return text.charAt(0).toUpperCase() + text.slice(1);
+});
+Vue.filter('myDate', function (date) {
+    return moment(date).format('MMMM Do YYYY, h:mm:ss a');
+});
+
 
 /**
  * The following block of code may be used to automatically register your
