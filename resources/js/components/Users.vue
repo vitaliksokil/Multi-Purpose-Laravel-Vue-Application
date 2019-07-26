@@ -34,7 +34,7 @@
                                 <td>{{user.type | upText}}</td>
                                 <td>{{user.created_at | myDate}}</td>
                                 <td>
-                                    <button class="btn btn-light">
+                                    <button class="btn btn-light" @click="editModal(user)">
                                         <i class="fa fa-edit blue"></i>
                                     </button>
                                     <button class="btn btn-light" @click="deleteUser(user.id)">
@@ -58,12 +58,12 @@
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="addNewLabel">Add New </h5>
+                        <h5 class="modal-title" id="addNewLabel">{{editMode ? "Edit user" : "Add new user"}} </h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <form @submit.prevent="createUser">
+                    <form @submit.prevent="editMode ? updateUser() : createUser()">
                         <div class="modal-body">
 
                             <div class="form-group">
@@ -107,7 +107,7 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-primary">Create</button>
+                            <button type="submit" :class="editMode ? 'btn btn-success' : 'btn btn-primary'">{{editMode ? "Update" : "Create"}}</button>
                         </div>
                     </form>
                 </div>
@@ -121,8 +121,10 @@
     export default {
         data() {
             return {
+                editMode:false,
                 // Create a new form instance
                 form: new Form({
+                    id:'',
                     name: '',
                     email: '',
                     password: '',
@@ -135,10 +137,40 @@
         },
 
         methods: {
+            updateUser(){
+                this.$Progress.start();
+                this.form.put('api/user/'+this.form.id).then(()=>{
+                    this.$Progress.finish();
+                    $('#addNew').modal('hide');
+                    Fire.$emit('successOperation');
+                    swal.fire(
+                        'Updated!',
+                        'User was successfully updated.',
+                        'success'
+                    )
+                }).catch(()=>{
+                    this.$Progress.fail();
+                    $('#addNew').modal('hide');
+
+                    swal.fire(
+                        'Error!',
+                        'Something\'s gone wrong.',
+                        'error'
+                    )
+                });
+
+            },
             newModal(){
+                this.editMode = false;
                 this.form.reset();
                 $('#addNew').modal('show');
 
+            },
+            editModal(user){
+                this.editMode = true;
+                this.form.reset();
+                $('#addNew').modal('show');
+                this.form.fill(user);
             },
             createUser() {
                 this.$Progress.start();
@@ -157,7 +189,14 @@
                         this.$Progress.finish();
                     })
                     .catch(() => {
+                        this.$Progress.fail();
+                        $('#addNew').modal('hide');
 
+                        swal.fire(
+                            'Error!',
+                            'Something\'s gone wrong.',
+                            'error'
+                        )
                     });
 
 

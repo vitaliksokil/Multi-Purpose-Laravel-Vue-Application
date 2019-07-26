@@ -23,7 +23,8 @@ Vue.use(VueRouter);
 const routes = [
     {path: '/dashboard', component: require('./components/Dashboard').default},
     {path: '/profile', component: require('./components/Profile').default},
-    {path: '/users', component: require('./components/Users').default}
+    {path: '/users', component: require('./components/Users').default},
+    {path: '/developer', component: require('./components/Developer').default},
 ];
 
 const router = new VueRouter({
@@ -64,6 +65,21 @@ window.Toast = Toast;
 //
 window.Fire = new Vue();
 
+//passport
+Vue.component(
+    'passport-clients',
+    require('./components/passport/Clients.vue').default
+);
+
+Vue.component(
+    'passport-authorized-clients',
+    require('./components/passport/AuthorizedClients.vue').default
+);
+
+Vue.component(
+    'passport-personal-access-tokens',
+    require('./components/passport/PersonalAccessTokens.vue').default
+);
 
 /**
  * The following block of code may be used to automatically register your
