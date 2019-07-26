@@ -40,6 +40,30 @@ Vue.filter('myDate', function (date) {
     return moment(date).format('MMMM Do YYYY, h:mm:ss a');
 });
 
+//progress bar
+import VueProgressBar from 'vue-progressbar'
+
+Vue.use(VueProgressBar, {
+    color: 'rgb(143, 255, 199)',
+    failedColor: 'red',
+    height: '2px'
+});
+
+//sweetalert
+import Swal from 'sweetalert2'
+window.swal = Swal;
+
+const Toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 3000
+});
+window.Toast = Toast;
+
+//
+window.Fire = new Vue();
+
 
 /**
  * The following block of code may be used to automatically register your

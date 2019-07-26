@@ -7,7 +7,7 @@
                         <h3 class="card-title">Users table</h3>
 
                         <div class="card-tools">
-                            <button class="btn btn-success" data-toggle="modal" data-target="#addNew">
+                            <button class="btn btn-success" @click="newModal">
 
                                 Add New
                                 <i class="fa fa-user-plus"></i>
@@ -34,12 +34,12 @@
                                 <td>{{user.type | upText}}</td>
                                 <td>{{user.created_at | myDate}}</td>
                                 <td>
-                                    <a href="#">
+                                    <button class="btn btn-light">
                                         <i class="fa fa-edit blue"></i>
-                                    </a>
-                                    <a href="">
+                                    </button>
+                                    <button class="btn btn-light" @click="deleteUser(user.id)">
                                         <i class="fa fa-trash red"></i>
-                                    </a>
+                                    </button>
                                 </td>
                             </tr>
 
@@ -130,20 +130,77 @@
                     bio: '',
                     photo: '',
                 }),
-                users:{}
+                users: {}
             }
         },
 
-        methods:{
-            createUser(){
-                this.form.post('api/user');
+        methods: {
+            newModal(){
+                this.form.reset();
+                $('#addNew').modal('show');
+
             },
-            loadUsers(){
+            createUser() {
+                this.$Progress.start();
+
+                this.form.post('api/user')
+                    .then(() => {
+                        Fire.$emit('successOperation');
+
+
+                        $('#addNew').modal('hide');
+                        Toast.fire({
+                            type: 'success',
+                            title: 'User created successfully'
+                        });
+
+                        this.$Progress.finish();
+                    })
+                    .catch(() => {
+
+                    });
+
+
+            },
+            loadUsers() {
                 axios.get('api/user').then(({data}) => (this.users = data.data));
+            },
+            deleteUser(id) {
+                swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    type: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+
+                    if (result.value) {
+                        this.$Progress.start();
+
+                        this.form.delete('api/user/' + id).then(() => {
+                            Fire.$emit('successOperation');
+                            swal.fire(
+                                'Deleted!',
+                                'Your file has been deleted.',
+                                'success'
+                            )
+
+                        }).catch(() => {
+                            swal("Failed!", "There was something wrong", "warning");
+                        });
+                        this.$Progress.finish();
+
+                    }
+                })
             }
         },
         created() {
-           this.loadUsers();
+            this.loadUsers();
+            Fire.$on('successOperation', () => {
+                this.loadUsers();
+            });
         },
         name: 'Users',
 
