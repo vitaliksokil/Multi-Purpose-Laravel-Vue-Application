@@ -51,7 +51,9 @@ class UserController extends Controller
             }
 
         }
+
         $user->update($request->all());
+
 
     }
 
