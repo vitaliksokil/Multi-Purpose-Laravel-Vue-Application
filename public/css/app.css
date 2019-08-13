@@ -29621,3 +29621,20 @@ readers do not read off random characters that represent icons */
   color: white !important;
 }
 
+.widget-user .widget-user-image > img {
+  width: 200px;
+  height: 200px;
+}
+
+.widget-user .widget-user-image {
+  position: static;
+  margin-left: 0;
+  align-self: center;
+  margin-top: -60px;
+}
+
+.widget-user .widget-user-header {
+  display: flex;
+  flex-direction: column;
+}
+

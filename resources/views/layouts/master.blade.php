@@ -92,7 +92,7 @@
 
                     <li class="nav-item">
                         <router-link to="/developer" class="nav-link">
-                            <i class="nav-icon fas fa-cogs orange"></i>
+                            <i class="nav-icon fas fa-cogs pink"></i>
                             <p>Developer</p>
                         </router-link>
                     </li>
