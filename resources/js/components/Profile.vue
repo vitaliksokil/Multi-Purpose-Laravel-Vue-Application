@@ -18,8 +18,8 @@
                     <!-- Add the bg color to the header using any of the bg-* classes -->
                     <div class="widget-user-header text-white"
                          style="background: url('./img/bg_profile.jpg') center center;">
-                        <h3 class="widget-user-username">{{form.name}}</h3>
-                        <h5 class="widget-user-desc">{{form.bio}}</h5>
+                        <h3 class="widget-user-username">{{this.form.name}}</h3>
+                        <h5 class="widget-user-desc">{{this.form.type}}</h5>
                         <div class="widget-user-image">
                             <img class="img-circle" :src="getProfilePhoto()" alt="User Avatar">
                         </div>

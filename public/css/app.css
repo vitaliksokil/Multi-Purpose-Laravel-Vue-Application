@@ -29638,3 +29638,8 @@ readers do not read off random characters that represent icons */
   flex-direction: column;
 }
 
+a {
+  color: #C2C7D0;
+  cursor: pointer;
+}
+

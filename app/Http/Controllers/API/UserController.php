@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Gate;
 
 
 class UserController extends Controller
@@ -20,6 +21,21 @@ class UserController extends Controller
     public function __construct()
     {
         $this->middleware('auth:api');
+    }
+
+    public function search()
+    {
+        if($search = \Request::get('q')){
+            $users =User::where(function ($query) use ($search){
+                $query->where('name','LIKE',"%$search%")
+                    ->orWhere('email','LIKE',"%$search%")
+                    ->orWhere('type','LIKE',"%$search%");
+            })->paginate(10);
+        }else{
+            $users= User::latest()->paginate(10);
+
+        }
+        return $users;
     }
 
     public function profile()
@@ -45,8 +61,8 @@ class UserController extends Controller
             \Image::make($request->photo)->save(public_path('img/profile/') . $name);
             $request->merge(['photo' => $name]);
 
-            $userPhoto = public_path('img/profile/').$currentPhoto;
-            if(file_exists($userPhoto) && $currentPhoto != 'profile.png'){
+            $userPhoto = public_path('img/profile/') . $currentPhoto;
+            if (file_exists($userPhoto) && $currentPhoto != 'profile.png') {
                 @unlink($userPhoto);
             }
 
@@ -64,13 +80,15 @@ class UserController extends Controller
      */
     public function index()
     {
-        return User::latest()->paginate(10);
+        if (Gate::allows('isAdmin') || Gate::allows('isAuthor')) {
+            return User::latest()->paginate(10);
+        }
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request $request
+     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
@@ -95,7 +113,7 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int $id
+     * @param int $id
      * @return \Illuminate\Http\Response
      */
     public function show($id)
@@ -106,8 +124,8 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request $request
-     * @param  int $id
+     * @param \Illuminate\Http\Request $request
+     * @param int $id
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
@@ -120,7 +138,7 @@ class UserController extends Controller
             'password' => 'sometimes|min:6',
         ]);
 
-        if(!empty($request->password )){
+        if (!empty($request->password)) {
             $request->merge([
                 'password' => Hash::make($request['password']),
             ]);
@@ -131,11 +149,13 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int $id
+     * @param int $id
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)
     {
+        $this->authorize('isAdmin');
+
         $user = User::findOrFail($id);
         $user->delete();
     }

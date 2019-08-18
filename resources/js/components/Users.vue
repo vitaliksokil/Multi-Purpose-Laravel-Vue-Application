@@ -1,6 +1,6 @@
 <template>
     <div class="container">
-        <div class="row">
+        <div class="row" v-if="$gate.isAdminOrAuthor()">
             <div class="col-md-12">
                 <div class="card mt-5">
                     <div class="card-header">
@@ -27,7 +27,7 @@
                                 <th>Registered At</th>
                                 <th>Modify</th>
                             </tr>
-                            <tr v-for="user in users" :key="user.id">
+                            <tr v-for="user in users.data" :key="user.id">
                                 <td>{{user.id}}</td>
                                 <td>{{user.name}}</td>
                                 <td>{{user.email}}</td>
@@ -47,6 +47,9 @@
                         </table>
                     </div>
                     <!-- /.card-body -->
+                    <div class="card-footer">
+                        <pagination :data="users" @pagination-change-page="getResults"></pagination>
+                    </div>
                 </div>
                 <!-- /.card -->
             </div>
@@ -107,13 +110,17 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
-                            <button type="submit" :class="editMode ? 'btn btn-success' : 'btn btn-primary'">{{editMode ? "Update" : "Create"}}</button>
+                            <button type="submit" :class="editMode ? 'btn btn-success' : 'btn btn-primary'">{{editMode ?
+                                "Update" : "Create"}}
+                            </button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
-
+        <div v-if="!$gate.isAdminOrAuthor()">
+            <not-found></not-found>
+        </div>
     </div>
 </template>
 
@@ -121,10 +128,10 @@
     export default {
         data() {
             return {
-                editMode:false,
+                editMode: false,
                 // Create a new form instance
                 form: new Form({
-                    id:'',
+                    id: '',
                     name: '',
                     email: '',
                     password: '',
@@ -137,9 +144,15 @@
         },
 
         methods: {
-            updateUser(){
+            getResults(page = 1) {
+                axios.get('api/user?page=' + page)
+                    .then(response => {
+                        this.users = response.data;
+                    });
+            },
+            updateUser() {
                 this.$Progress.start();
-                this.form.put('api/user/'+this.form.id).then(()=>{
+                this.form.put('api/user/' + this.form.id).then(() => {
                     this.$Progress.finish();
                     $('#addNew').modal('hide');
                     Fire.$emit('successOperation');
@@ -148,7 +161,7 @@
                         'User was successfully updated.',
                         'success'
                     )
-                }).catch(()=>{
+                }).catch(() => {
                     this.$Progress.fail();
                     $('#addNew').modal('hide');
 
@@ -160,13 +173,13 @@
                 });
 
             },
-            newModal(){
+            newModal() {
                 this.editMode = false;
                 this.form.reset();
                 $('#addNew').modal('show');
 
             },
-            editModal(user){
+            editModal(user) {
                 this.editMode = true;
                 this.form.reset();
                 $('#addNew').modal('show');
@@ -202,7 +215,9 @@
 
             },
             loadUsers() {
-                axios.get('api/user').then(({data}) => (this.users = data.data));
+                if (this.$gate.isAdmin() || this.$gate.isAuthor()) {
+                    axios.get('api/user').then(({data}) => (this.users = data));
+                }
             },
             deleteUser(id) {
                 swal.fire({
@@ -236,6 +251,27 @@
             }
         },
         created() {
+            Fire.$on('searching', () => {
+                this.$Progress.start();
+
+                let query = this.$parent.search;
+                axios.get('api/findUser?q=' + query)
+                    .then((data) => {
+                        this.$Progress.finish();
+                       this.users = data.data;
+                    }).catch(() => {
+
+                    this.$Progress.fail();
+
+                    swal.fire(
+                        'Error!',
+                        'Something\'s gone wrong.',
+                        'error'
+                    )
+                });
+
+
+            });
             this.loadUsers();
             Fire.$on('successOperation', () => {
                 this.loadUsers();

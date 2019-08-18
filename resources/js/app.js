@@ -25,6 +25,7 @@ const routes = [
     {path: '/profile', component: require('./components/Profile').default},
     {path: '/users', component: require('./components/Users').default},
     {path: '/developer', component: require('./components/Developer').default},
+    {path: '*', component: require('./components/NotFound').default},
 ];
 
 const router = new VueRouter({
@@ -52,6 +53,7 @@ Vue.use(VueProgressBar, {
 
 //sweetalert
 import Swal from 'sweetalert2'
+
 window.swal = Swal;
 
 const Toast = Swal.mixin({
@@ -81,6 +83,22 @@ Vue.component(
     require('./components/passport/PersonalAccessTokens.vue').default
 );
 
+
+//gate
+import Gate from './Gate'
+
+Vue.prototype.$gate = new Gate(window.user);
+
+//404 not found
+Vue.component(
+    'not-found',
+    require('./components/NotFound.vue').default
+);
+
+// pagination
+Vue.component('pagination', require('laravel-vue-pagination'));
+
+
 /**
  * The following block of code may be used to automatically register your
  * Vue components. It will recursively scan this directory for the Vue
@@ -101,5 +119,18 @@ Vue.component('example-component', require('./components/ExampleComponent.vue').
  */
 
 const app = new Vue({
-    router
+    router,
+    data: {
+        search: ''
+    },
+    methods: {
+        searching: _.debounce(() => {
+            Fire.$emit('searching');
+
+        }, 1000),
+        printme() {
+            window.print();
+        }
+    },
+
 }).$mount('#app');
